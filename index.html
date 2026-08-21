@@ -575,18 +575,35 @@ function doPost(e) {
             }
         ];
 
+        // =========================================================================
+        // PENGATURAN URL DATABASE PERMANEN
+        // =========================================================================
+        // Masukkan URL Web App Google Apps Script Anda di dalam tanda kutip di bawah ini.
+        // Jika diisi, Anda dan siswa tidak perlu lagi memasukkan URL secara manual di browser apapun.
+        // Contoh: const PERMANENT_GAS_URL = "https://script.google.com/macros/s/AKfy.../exec";
+        const PERMANENT_GAS_URL = "https://script.google.com/macros/s/AKfycbyJGFFxksKD8ZHJ2yFxPX8ssvUCGxerIRgP0eXZM-USpVQVSHR9zphzh3haquHK2IWKpQ/exec"; 
+        // =========================================================================
+
         // State Variables
         let currentQuestionIdx = 0;
         let userAnswers = new Array(quizData.length).fill(null);
         let studentProfile = {};
         let timerInterval = null;
         let timeRemaining = 45 * 60; // 45 menit dalam detik
-        let gasWebUrl = localStorage.getItem("gas_web_url") || "";
+        
+        // Memprioritaskan URL Permanen, jika kosong baru mengambil dari LocalStorage
+        let gasWebUrl = PERMANENT_GAS_URL || localStorage.getItem("gas_web_url") || "";
 
         // DOM Loaded Init
         document.addEventListener("DOMContentLoaded", () => {
             initUrlStatus();
             document.getElementById("webAppUrlInput").value = gasWebUrl;
+            
+            // Nonaktifkan input jika URL permanen sudah diisi dari kode
+            if(PERMANENT_GAS_URL !== "") {
+                document.getElementById("webAppUrlInput").disabled = true;
+                document.getElementById("webAppUrlInput").classList.add("bg-slate-100", "cursor-not-allowed");
+            }
         });
 
         function initUrlStatus() {
@@ -920,6 +937,12 @@ function doPost(e) {
         }
 
         function saveGasUrl() {
+            if(PERMANENT_GAS_URL !== "") {
+                alert("URL sudah diatur secara permanen melalui kode sumber. Tidak perlu disimpan ulang.");
+                toggleModal("gasModal");
+                return;
+            }
+            
             const val = document.getElementById("webAppUrlInput").value.trim();
             gasWebUrl = val;
             localStorage.setItem("gas_web_url", val);
